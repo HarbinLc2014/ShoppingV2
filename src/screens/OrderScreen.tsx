@@ -44,7 +44,6 @@ export default function OrderScreen() {
   };
 
   const calculateTotal = useCallback(() => {
-    console.log('CALCULATING')
     return products.reduce((acc, product) => {
       return acc + Number(product.price) * quantities[product.id];
     }, 0);
