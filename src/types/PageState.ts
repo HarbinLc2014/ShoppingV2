@@ -1,0 +1,1 @@
+type PageState = 'loading' | 'loaded' | 'error'
