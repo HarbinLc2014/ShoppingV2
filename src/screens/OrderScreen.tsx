@@ -44,6 +44,7 @@ export default function OrderScreen() {
   };
 
   const calculateTotal = useCallback(() => {
+    console.log('CALCULATING')
     return products.reduce((acc, product) => {
       return acc + Number(product.price) * quantities[product.id];
     }, 0);
@@ -51,12 +52,16 @@ export default function OrderScreen() {
 
 
   const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity >= 0) {
-      setQuantities((prevQuantities) => ({
-        ...prevQuantities,
-        [id]: newQuantity,
-      }));
-    }
+    setQuantities((prevQuantities) => {
+      // Only update if the new quantity is different, this will make useCallback on calculateTotal work.
+      if (prevQuantities[id] !== newQuantity && newQuantity >= 0) {
+        return {
+          ...prevQuantities,
+          [id]: newQuantity,
+        };
+      }
+      return prevQuantities; // Return the same state if nothing changed
+    });
   };
 
   const renderPageContent = () => {
