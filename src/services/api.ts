@@ -16,8 +16,8 @@ const isProduct = (data: any): data is Product => {
 export const fetchProducts = async () => {
     const response = await axios.get('https://ls-products-8f76e2d2fc97.herokuapp.com/');
     // Use the type guard to validate the response data
-    if (isProductArray(response.data)) {
+    if (!isProductArray(response.data)) {
       throw new Error('Sorry we are currently experiencing an ongoing issue. Please try again later.');
     }
-    return response.data; // Now TypeScript knows this is Product[]
+    return response.data;
 };

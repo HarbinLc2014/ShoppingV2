@@ -27,6 +27,7 @@ export default function OrderScreen() {
 
   const newOrder = async () => {
     setPageState("loading");
+    setErrMsg(""); // clear error message
     try {
       const products = await fetchProducts();
       setProducts(products);
@@ -58,54 +59,73 @@ export default function OrderScreen() {
   };
 
   const renderPageContent = () => {
-    if(pageState === 'loaded')
-    return (
-      <>
-        <FlatList
-          data={products}
-          getItemLayout={(_, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
-          renderItem={({ item }) => {
-            return (
-              <OrderItem
-                item={item}
-                quantity={quantities[item.id]}
-                updateQuantity={updateQuantity}
-              />
-            );
-          }}
-        />
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Total</Text>
-          <Text
-            style={[styles.footerText, { textAlign: "right" }]}
-            testID="total-price"
-          >
-            ${calculateTotal().toFixed(2)}
+    if (pageState === "loaded")
+      return !products?.length ? (
+        <View style={styles.stateContainer}>
+          <Text style={styles.errorText}>
+            Sorry there are no products available in your order.
           </Text>
         </View>
-      </>
-    );
+      ) : (
+        <>
+          <FlatList
+            keyExtractor={(item) => item.id.toString()}
+            data={products}
+            getItemLayout={(_, index) => ({
+              length: ITEM_HEIGHT,
+              offset: ITEM_HEIGHT * index,
+              index,
+            })}
+            renderItem={({ item }) => {
+              return (
+                <OrderItem
+                  item={item}
+                  quantity={quantities[item.id]}
+                  updateQuantity={updateQuantity}
+                />
+              );
+            }}
+          />
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Total</Text>
+            <Text
+              style={[styles.footerText, { textAlign: "right" }]}
+              testID="total-price"
+            >
+              ${calculateTotal().toFixed(2)}
+            </Text>
+          </View>
+        </>
+      );
     return (
-      <View
-        style={styles.stateContainer}
-      >
-        {pageState === 'error'? <Text style={styles.errorText}>
-          {errMsg}
-        </Text>: <ActivityIndicator size="large" />}
+      <View style={styles.stateContainer}>
+        {pageState === "error" ? (
+          <Text style={styles.errorText}>{errMsg}</Text>
+        ) : (
+          <ActivityIndicator size="large" />
+        )}
       </View>
-    )
+    );
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.orderModal}>
-        <TouchableWithoutFeedback onPress={newOrder} disabled={pageState === 'loading'}>
-          <View style={[styles.newOrderButton, {backgroundColor: pageState === 'loading'? 'grey': '#2e61de'}]}>
-            <Text style={styles.newOrderButtonText}>New order</Text>
+        <TouchableWithoutFeedback
+          onPress={newOrder}
+          disabled={pageState === "loading"}
+        >
+          <View
+            style={[
+              styles.newOrderButton,
+              { backgroundColor: pageState === "loading" ? "grey" : "#2e61de" },
+            ]}
+          >
+            <Text style={styles.newOrderButtonText}>
+              {pageState === "loading"
+                ? "Preparing your order..."
+                : "New order"}
+            </Text>
           </View>
         </TouchableWithoutFeedback>
         {renderPageContent()}
@@ -155,6 +175,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
   },
-  stateContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32 },
-  errorText: { fontSize: 18, fontWeight: "400", lineHeight: 27 }
+  stateContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
+  },
+  errorText: { fontSize: 18, fontWeight: "400", lineHeight: 27, textAlign: 'center' },
 });
