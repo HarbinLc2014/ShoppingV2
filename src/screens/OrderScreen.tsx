@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Product } from "../types/Product";
 import { fetchProducts } from "../services/api";
 import { OrderItem } from "../components/OrderItem";
@@ -43,11 +43,12 @@ export default function OrderScreen() {
     }
   };
 
-  const calculateTotal = () => {
+  const calculateTotal = useCallback(() => {
     return products.reduce((acc, product) => {
       return acc + Number(product.price) * quantities[product.id];
     }, 0);
-  };
+  }, [products, quantities]); // Recalculate only when products or quantities change
+
 
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity >= 0) {
@@ -59,6 +60,7 @@ export default function OrderScreen() {
   };
 
   const renderPageContent = () => {
+    const total = calculateTotal().toFixed(2);
     if (pageState === "loaded")
       return !products?.length ? (
         <View style={styles.stateContainer}>
@@ -92,7 +94,7 @@ export default function OrderScreen() {
               style={[styles.footerText, { textAlign: "right" }]}
               testID="total-price"
             >
-              ${calculateTotal().toFixed(2)}
+              ${total}
             </Text>
           </View>
         </>
